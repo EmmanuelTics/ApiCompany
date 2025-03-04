@@ -3,7 +3,7 @@ plugins {
     application
 
      kotlin("plugin.serialization") version "1.9.0"  // Esto habilita la serialización de Kotlin
-
+id("com.github.johnrengelman.shadow") version "8.1.1" // Agrega este plugin
 
 }
 
@@ -47,4 +47,21 @@ kotlin {
 
 tasks.withType<JavaExec> {
     systemProperty("file.encoding", "UTF-8")
+}
+tasks.register("printJavaVersion") {
+    doLast {
+        println("Java version: ${System.getProperty("java.version")}")
+    }
+}
+
+// Configurar la tarea 'Jar' correctamente
+tasks {
+    shadowJar {
+        archiveBaseName.set("aplicacion")
+        archiveVersion.set("1.0")
+        archiveClassifier.set("")
+        manifest {
+            attributes("Main-Class" to "ApplicationKt")
+        }
+    }
 }

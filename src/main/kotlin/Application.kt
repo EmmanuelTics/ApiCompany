@@ -14,7 +14,7 @@ import io.ktor.http.*
 import io.ktor.server.plugins.cors.*
 
 fun main() {
-    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
+    embeddedServer(Netty, host = "0.0.0.0", port = 8080, module = Application::module).start(wait = true)
 }
 
 fun Application.module() {
