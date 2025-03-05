@@ -22,7 +22,7 @@ post("/add") {
         val employees = call.receive<List<Employee>>() // Cambiar para recibir una lista de empleados
         employees.forEach { employee ->
             collection.insertOne(employee) // Insertar cada empleado
-        }
+        }   
         call.respond(HttpStatusCode.Created, "Employees added successfully")
     } catch (e: Exception) {
         e.printStackTrace()
@@ -59,46 +59,49 @@ post("/add") {
             }
         }
 
-        put("/update/{name}") {
+     put("/update/{name}") {
             try {
                 val name = call.parameters["name"] ?: throw IllegalArgumentException("Name parameter is missing")
-                val updatedEmployee = call.receive<Employee>()
+                val updatedEmployees = call.receive<List<Employee>>() // Recibir una lista de empleados
 
-                // Actualización de los campos que han cambiado
-                val result = collection.updateOne(
-                    Employee::name eq name,
-                    set(
-                        Employee::name setTo updatedEmployee.name,
-                        Employee::address setTo updatedEmployee.address,
-                        Employee::birthdate setTo updatedEmployee.birthdate,
-                        Employee::nationality setTo updatedEmployee.nationality,
-                        Employee::maritalStatus setTo updatedEmployee.maritalStatus,
-                        Employee::educationLevel setTo updatedEmployee.educationLevel,
-                        Employee::birthCertificate setTo updatedEmployee.birthCertificate,
-                        Employee::rfc setTo updatedEmployee.rfc,
-                        Employee::ine setTo updatedEmployee.ine,
-                        Employee::curp setTo updatedEmployee.curp,
-                        Employee::nss setTo updatedEmployee.nss,
-                        Employee::phone setTo updatedEmployee.phone,
-                        Employee::email setTo updatedEmployee.email,
-                        Employee::bankAccount setTo updatedEmployee.bankAccount,
-                        Employee::bankName setTo updatedEmployee.bankName,
-                        Employee::salary setTo updatedEmployee.salary
+                // Iterar sobre los empleados y actualizar uno por uno
+                updatedEmployees.forEach { updatedEmployee ->
+                    val result = collection.updateOne(
+                        Employee::name eq name,
+                        set(
+                            Employee::name setTo updatedEmployee.name,
+                            Employee::address setTo updatedEmployee.address,
+                            Employee::birthdate setTo updatedEmployee.birthdate,
+                            Employee::nationality setTo updatedEmployee.nationality,
+                            Employee::maritalStatus setTo updatedEmployee.maritalStatus,
+                            Employee::educationLevel setTo updatedEmployee.educationLevel,
+                            Employee::birthCertificate setTo updatedEmployee.birthCertificate,
+                            Employee::rfc setTo updatedEmployee.rfc,
+                            Employee::ine setTo updatedEmployee.ine,
+                            Employee::curp setTo updatedEmployee.curp,
+                            Employee::nss setTo updatedEmployee.nss,
+                            Employee::phone setTo updatedEmployee.phone,
+                            Employee::email setTo updatedEmployee.email,
+                            Employee::bankAccount setTo updatedEmployee.bankAccount,
+                            Employee::bankName setTo updatedEmployee.bankName,
+                            Employee::salary setTo updatedEmployee.salary,
+                            Employee::workstation setTo updatedEmployee.workstation
+                        )
                     )
-                )
 
-                // Verificar si el empleado fue encontrado y actualizado
-                if (result.matchedCount > 0) {
-                    call.respond(HttpStatusCode.OK, "Employee updated successfully")
-                } else {
-                    call.respond(HttpStatusCode.NotFound, "Employee not found")
+                    // Verificar si el empleado fue encontrado y actualizado
+                    if (result.matchedCount == 0L) { // Comparación con Long
+                        call.respond(HttpStatusCode.NotFound, "Employee with name $name not found")
+                        return@forEach  // Salir del bucle si no se encuentra el empleado
+                    }
                 }
+
+                call.respond(HttpStatusCode.OK, "Employees updated successfully")
             } catch (e: Exception) {
                 e.printStackTrace()
-                call.respond(HttpStatusCode.InternalServerError, "Error updating employee: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, "Error updating employees: ${e.message}")
             }
         }
-
         delete("/delete/{name}") {
             try {
                 val name = call.parameters["name"] ?: throw IllegalArgumentException("Name parameter is missing")
